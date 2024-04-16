@@ -4,7 +4,7 @@
 
 Estudiante1: Nicolas Perez Teran - 202116903
 
-Estudiante2: David Zamora -  202113407
+Estudiante2: Carlos Muñoz
 
 # Docencia
 
