@@ -1,0 +1,23 @@
+{
+    "name": "BI_Poyecto1",
+    "dockerComposeFile": "docker-compose.yaml",
+    "service": "web_server",
+    "workspaceFolder": "/workspace",
+    "forwardPorts": [80, 5432, 8000],
+    "customizations": {
+      "vscode": {
+        "settings": {},
+        "extensions": [
+          "ms-python.python",
+          "ms-python.vscode-pylance",
+          "VisualStudioExptTeam.vscodeintellicode",
+          "ms-python.black-formatter",
+          "ms-python.isort",
+          "esbenp.prettier-vscode",
+          "redhat.vscode-yaml",
+          "EditorConfig.EditorConfig",
+          "eamodio.gitlens"
+        ]
+      }
+    }
+  }
