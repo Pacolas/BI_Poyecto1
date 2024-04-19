@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-
+import Training from './training'
+import Box from '@mui/material/Box';
+import TextField from '@mui/material/TextField';
+import { Button } from '@mui/material';
+import Typography from '@mui/material/Typography';
+import Stack from '@mui/material/Stack';
 function UploadCSV() {
   const [file, setFile] = useState(null);
   const [version, setVersion] = useState('');
@@ -32,11 +37,30 @@ function UploadCSV() {
   };
 
   return (
-    <div>
-      <input type="file" onChange={handleFileChange} />
-      <input type="text" value={version} onChange={handleVersionChange} placeholder="Ingrese la versión" />
-      <button onClick={handleSubmit}>Enviar CSV</button>
-    </div>
+    <Box mx paddingLeft="40px">
+      <Stack>
+        <Typography variant="h4" sx={{ fontWeight: 700 }} textAlign="center">
+          Entrena un nuevo modelo
+        </Typography>
+        <Typography variant="h6" textAlign="center">
+          Selecciona el archivo con el que deseas entrenar el modelo
+        </Typography>
+        <Box mx="auto">
+          <TextField type="file" onChange={handleFileChange} />
+        </Box>
+        <Typography variant="h6" textAlign="center">
+          Escribe el nombre con el que deseas guardar el archivo
+        </Typography>
+        <Box mx="auto" display="flex" alignItems="center">
+          <TextField size="small" type="text" value={version} onChange={handleVersionChange} placeholder="Ingrese la versión" />
+          <Button size="large" variant="contained" onClick={handleSubmit}>Enviar CSV</Button>
+        </Box>
+      </Stack>
+
+
+
+      <Training />
+    </Box>
   );
 }
 

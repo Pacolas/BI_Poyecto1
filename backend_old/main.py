@@ -34,6 +34,9 @@ engine = create_engine(
     f"postgresql+psycopg://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}", echo=True
 )
 
+#Base.metadata.drop_all(engine)
+#Base.metadata.create_all(engine)
+
 
  
 app.add_middleware(
