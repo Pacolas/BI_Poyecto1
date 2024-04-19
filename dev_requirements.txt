@@ -1,6 +1,9 @@
-black
-
 fastapi
-sqlalchemy
 uvicorn[standard]
-psycopg[binary]
+psycopg[c]
+sqlalchemy
+scikit-learn
+nltk
+patterns
+inflect
+joblib

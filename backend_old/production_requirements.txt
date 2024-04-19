@@ -2,3 +2,8 @@ fastapi
 uvicorn[standard]
 psycopg[c]
 sqlalchemy
+scikit-learn
+nltk
+patterns
+inflect
+joblib
