@@ -36,11 +36,6 @@ function App() {
                                     Predecir una reseña
                                 </Link>
                             </Button>
-                            <Button>
-                                <Link to="/train" className="nav-link">
-                                    Predecir un archivo
-                                </Link>
-                            </Button>
                         </ButtonGroup>
                     </Toolbar>
                 </AppBar>
