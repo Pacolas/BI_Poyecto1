@@ -98,6 +98,7 @@ def tokenize_spanish(text):
     return tokens
 
 def preprocessing(data_t):
+    download_nltk_resources()
     data_t['Review'] = data_t['Review'].apply(eliminar_risas)
     data_t['Review'] = data_t['Review'].apply(limpiar_texto)
     data_t['Review'] = data_t['Review'].apply(expandir_contracciones)
@@ -139,7 +140,8 @@ def download_nltk_resources():
     
     nltk.download('wordnet')  
     nltk.download('omw')  
-    nltk.download('punkt')  
+    nltk.download('punkt')
+    nltk.download('stopwords')   
     
     
 
