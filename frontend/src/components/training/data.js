@@ -52,7 +52,7 @@ function UploadCSV() {
           Escribe el nombre con el que deseas guardar el archivo
         </Typography>
         <Box mx="auto" display="flex" alignItems="center">
-          <TextField size="small" type="text" value={version} onChange={handleVersionChange} placeholder="Ingrese la versión" />
+          <TextField size="small" type="text" value={version} onChange={handleVersionChange} placeholder="Ingrese el nombre de la version" />
           <Button size="large" variant="contained" onClick={handleSubmit}>Enviar CSV</Button>
         </Box>
       </Stack>
