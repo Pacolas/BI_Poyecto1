@@ -36,8 +36,8 @@ engine = create_engine(
     f"postgresql+psycopg://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}", echo=True
 )
 
-# Base.metadata.drop_all(engine)
-# Base.metadata.create_all(engine)
+Base.metadata.drop_all(engine)
+Base.metadata.create_all(engine)
 
 
  
@@ -272,10 +272,10 @@ async def upload_csv(csv_file: UploadFile = File(...), version: str = Form(...))
         data_json = df.to_dict(orient='records')
         xd = [Training(**item) for item in data_json]
         addTrainings(xd)  # Convertir cada dict a objeto Training y pasarlos a addTrainings
-
+        train(version)
         return {"message": "Archivo CSV procesado exitosamente"}
     except Exception as e:
-        print(e)
+        
         return {"error": str(e)}
     
 @app.post("/predict/quotes")
