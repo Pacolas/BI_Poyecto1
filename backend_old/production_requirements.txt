@@ -7,3 +7,5 @@ nltk
 patterns
 inflect
 joblib
+seaborn
+numpy

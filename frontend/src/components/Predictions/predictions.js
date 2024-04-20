@@ -53,7 +53,7 @@ function UploadCSV() {
         ))}
       </select>
       <input type="text" value={textInput} onChange={handleTextChange} placeholder="Ingrese el texto" />
-      <button onClick={handleSubmit}>Enviar Datos</button>
+      <button onClick={handleSubmit}>Enviar CSV</button>
       {responseMessage && <p>Respuesta del modelo {version}: {responseMessage}</p>}
     </div>
   );
