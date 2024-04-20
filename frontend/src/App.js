@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Route, Link, Routes } from "react-router-dom";
 import Data from "./components/training/data";
 import Predict from "./components/Predictions/predictions";
+import Predicts from "./components/Predictions/s_prediction";
 import Training from "./components/training/training";
 import "bootstrap/dist/css/bootstrap.min.css"; // Agrega esta línea para importar los estilos de Bootstrap
 import AppBar from '@mui/material/AppBar';
@@ -36,6 +37,11 @@ function App() {
                                     Predecir una reseña
                                 </Link>
                             </Button>
+                            <Button>
+                                <Link to="/predicts" className="nav-link">
+                                    Predecir una reseña
+                                </Link>
+                            </Button>
                         </ButtonGroup>
                     </Toolbar>
                 </AppBar>
@@ -43,6 +49,7 @@ function App() {
             <Routes>
                 <Route path="/data" element={<Data />} />
                 <Route path="/predict" element={<Predict />} />
+                <Route path="/predicts" element={<Predicts />} />
                 <Route path="/train" element={<Training />} />
             </Routes>
 

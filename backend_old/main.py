@@ -4,8 +4,10 @@ from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
 from hashlib import sha256
 from typing import List
+from fastapi.responses import FileResponse
 import backend_old.model.predict as pr
 import pandas as pd 
+import io 
 import backend_old.model.training as ml
 from backend_old.schemas import (
     Training,
@@ -34,8 +36,8 @@ engine = create_engine(
     f"postgresql+psycopg://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}", echo=True
 )
 
-#Base.metadata.drop_all(engine)
-#Base.metadata.create_all(engine)
+Base.metadata.drop_all(engine)
+Base.metadata.create_all(engine)
 
 
  
@@ -55,7 +57,12 @@ def getPredictions():
     with engine.connect() as c:
         result = c.execute(text("SELECT * FROM predictions"))
         return result.all()
-
+@app.get("/metrics", response_model=List[Metric])
+def getMetrics():
+    with engine.connect() as c:
+        result = c.execute(text("SELECT * FROM metrics"))
+        return result.all()
+    
 @app.get("/trainings", response_model=List[Training])
 def getTrainings(): 
     with engine.connect() as c:
@@ -69,7 +76,6 @@ def getTrainings():
 def addPrediction(prediction: Prediction):
 
     predictiond = {
-        "id": prediction.id,
         "creator": prediction.creator,
         "description": prediction.description,
         "calification": prediction.calification,
@@ -84,7 +90,7 @@ def addPrediction(prediction: Prediction):
             c.commit()
             return predictiond
 
-@app.get("/predictions/{id}", response_model=Prediction)
+
 def getPrediction(id: int):
     with engine.connect() as c:
         stmt = predictions.select().where(predictions.c.id == id)
@@ -93,6 +99,14 @@ def getPrediction(id: int):
             raise HTTPException(status_code=404, detail="Prediction not found")
         return result
     
+@app.get("/predictions/{version}", response_model=List[Prediction])
+def getPredictionByVersion(version: str):
+    with engine.connect() as c:
+        stmt = predictions.select().where(predictions.c.version == version)
+        result = c.execute(stmt).all()
+        if result is None:
+            raise HTTPException(status_code=404, detail="Prediction not found")
+        return result  
 @app.post("/trainings")
 def addTraining(training: Training):
     
@@ -132,7 +146,7 @@ def getVersionByName(name):
         stm = versions.select().where(versions.c.name == name)
         result = c.execute(stm ).fetchone()
         if result is None:
-            raise HTTPException(status_code=404, detail="Training not found")
+            raise HTTPException(status_code=404, detail="Version not found")
         return result
 
 @app.get('/versions', response_model=List[Version])
@@ -152,13 +166,20 @@ def addTrainings(trainings: List[Training]):
                 c.execute(versions.insert().values(name=trainings[0].version))
                 c.commit()
             for training in trainings:
-                print(type(training))
                 addTraining(training)  
             return {"message": "Trainings added successfully"}
         except HTTPException as e:
 
             return "Error: " + str(e)
-
+@app.post("/predictions/several")
+def addPredictions (predictions: List[Prediction]):
+    with engine.connect() as c:
+        try:
+            for predict in predictions:
+                addPrediction(predict)  
+            return {"message": "Predictions added successfully"}
+        except HTTPException as e:
+            return "Error: " + str(e)
 @app.get("/training/{id}", response_model=Training)
 def getTraining(id: int):
     with engine.connect() as c:
@@ -178,13 +199,68 @@ def train(version: str):
         result = c.execute(state).all()
         
         df = ml.sqltoDF(result)
-        ml.train_model(df)
+        metrics = ml.train_model(df)
+        for metric in metrics:
+            addMetric(metric,metrics[metric],  version)
 
         return []
 
 
+def addMetric(name,value, version):
+    data ={'name': name, 'percent': value, 'version':version }
+    with engine.connect() as c:
+        try:
+            c.execute(metrics.insert().values(data))
+            c.commit()
+            return data
+        except HTTPException as e:
+            return "Cannot create Version, already exists"
+            
+                        
+@app.get("/metrics/{version}", response_model=List[Metric])
+def getMetricsFromVersion(version):
+    with engine.connect() as c:
+        stmt = metrics.select().where(metrics.c.version == version)
+        result = c.execute(stmt).all()
+        if result is None:
+            raise HTTPException(status_code=404, detail="Metrics not found")
+        
+        return result
 
 
+@app.get("/metrics/{name}/matrix")
+async def get_image(name: str):
+    
+    image_path = f"./backend_old/model/ml_models/mtz_confussion/confusion_matrix{name}.png"
+    
+    # Devolver la imagen como una respuesta de archivo estático
+    return FileResponse(image_path, media_type="image/png")
+@app.post("/upload/predict")
+async def upload_predict_csv(csv_file: UploadFile = File(...), version: str = Form(...)):
+    try:
+        df = pd.read_csv(csv_file.file)
+        df['version'] = version
+        df['id'] = None
+        df['creator'] = 'Carlos Analista'
+        
+        # Convertir DataFrame a formato CSV en memoria
+        csv_buffer = io.StringIO()
+        df.to_csv(csv_buffer, index=False)
+        csv_data = csv_buffer.getvalue()
+        
+        prediction = pr.predict(df, version)
+        df['Class'] = prediction
+        df.rename(columns={"Review": "description", "Class": "calification"}, inplace=True)
+        data_json = df.to_dict(orient='records')
+        xd = [Prediction(**item) for item in data_json]
+        addPredictions(xd)  # Convertir cada dict a objeto Training y pasarlos a addTrainings
+        
+        # Retornar el archivo CSV convertido como un string
+        return {"message": "Archivo CSV procesado exitosamente", "csv_data": csv_data}
+    except Exception as e:
+        print(e)
+        return {"error": str(e)}
+    
 
 @app.post("/upload")
 async def upload_csv(csv_file: UploadFile = File(...), version: str = Form(...)):
@@ -196,22 +272,25 @@ async def upload_csv(csv_file: UploadFile = File(...), version: str = Form(...))
         data_json = df.to_dict(orient='records')
         xd = [Training(**item) for item in data_json]
         addTrainings(xd)  # Convertir cada dict a objeto Training y pasarlos a addTrainings
-
+        train(version)
         return {"message": "Archivo CSV procesado exitosamente"}
     except Exception as e:
-        print(e)
+        
         return {"error": str(e)}
     
-
-
 @app.post("/predict/quotes")
 async def predict_text(version: str = Query(...), texto: str = Query(...)):
     try:
         df = pd.DataFrame({'Review': [texto]})
         df['version'] = version
         df['id'] = None
-        
+        df['creator'] = "Diego Peruano"
         prediction = pr.predict(df, version)
+        df['Class'] = prediction
+        df.rename(columns={"Review": "description", "Class": "calification"}, inplace=True)
+        data_json = df.to_dict(orient='records')
+        xd = [Prediction(**item) for item in data_json]
+        addPrediction(xd[0])
         return {"message": "La calificación asignada es " + str(prediction[0])}
     except Exception as e:
         print(e)

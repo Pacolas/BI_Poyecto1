@@ -15,6 +15,7 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 training_id_seq = Sequence('training_id_seq')
 version_id_seq = Sequence('version_id_seq')
+predictions_id_seq = Sequence('prediction_id_seq')
 
 # Crear la tabla 'trainings' con el ID usando la secuencia
 trainings = Table(
@@ -36,9 +37,9 @@ versions = Table(
 predictions = Table(
     "predictions",
     Base.metadata,
-    Column("id", BigInteger(), primary_key=True, index=True),
+    Column("id", BigInteger(),predictions_id_seq, primary_key=True, index=True),
     Column("creator", String(), index=True),
-    Column("description", String(), index=True),
+    Column("description", String()),
     Column("calification", Integer()),
     Column("version", String(), index=True)
 )
@@ -47,10 +48,9 @@ predictions = Table(
 metrics = Table(
     "metrics",
     Base.metadata,
-    Column("id", BigInteger(), primary_key=True, index=True),
-    Column("name", String(), index=True),
+    Column("name", String(), primary_key=True ,index=True),
     # password = Column(String)
     Column("percent", Float(), index=True),
-    Column("version", String(), index=True)
+    Column("version", String(),primary_key=True , index=True)
 
 )

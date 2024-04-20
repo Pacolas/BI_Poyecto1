@@ -15,7 +15,7 @@ class Training(BaseModel):
 
 class Prediction(BaseModel):
 
-    id: int
+    id: Optional[int]
     creator: str
     description: str
     calification: int
@@ -23,7 +23,6 @@ class Prediction(BaseModel):
 
 
 class Metric(BaseModel):
-    id: int
     name: str
     percent: float
     version: str

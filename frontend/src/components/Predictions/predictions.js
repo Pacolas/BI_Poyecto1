@@ -45,6 +45,7 @@ function UploadCSV() {
   };
 
   return (
+<<<<<<< HEAD
   <div>
     <h1>Predecir una reseña individual</h1>
     <select value={version} onChange={handleVersionChange}>
@@ -58,6 +59,20 @@ function UploadCSV() {
     {responseMessage && <p>Respuesta del modelo {version}: {responseMessage}</p>}
   </div>
 );
+=======
+    <div>
+      <select value={version} onChange={handleVersionChange}>
+        <option value="">Seleccione una versión</option>
+        {versionsList.map((versionItem, index) => (
+          <option key={index} value={versionItem.name}>{versionItem.name}</option>
+        ))}
+      </select>
+      <input type="text" value={textInput} onChange={handleTextChange} placeholder="Ingrese el texto" />
+      <button onClick={handleSubmit}>Enviar CSV</button>
+      {responseMessage && <p>Respuesta del modelo {version}: {responseMessage}</p>}
+    </div>
+  );
+>>>>>>> 804b091f0508fd60c3b59649ac056826060816c0
 }
 
 export default UploadCSV;
