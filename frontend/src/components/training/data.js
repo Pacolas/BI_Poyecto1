@@ -18,7 +18,7 @@ function UploadCSV() {
   const [success, setSuccess] = useState(false);
   const [file, setFile] = useState(null);
   const [version, setVersion] = useState('');
-  const [image, setImage] = useState("null");
+  const [image, setImage] = useState(null);
   const [precision, setPrecision] = useState('-');
   const [accuracy, setAccuracy] = useState('-');
   const [recall, setRecall] = useState('-');
@@ -251,7 +251,10 @@ function UploadCSV() {
             Matriz de confusión
           </Typography>
           <Box mx="auto" display="flex" alignItems="center" justifyContent="center">
+            {image? 
             <img src={image} alt="Imagen" width="500px" />
+            : "Por favor carga un modelo para poder ver sus resultados"}
+            
           </Box>
 
 
