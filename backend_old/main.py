@@ -4,7 +4,7 @@ from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
 from hashlib import sha256
 from typing import List
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 import backend_old.model.predict as pr
 import pandas as pd 
 import io 
@@ -36,8 +36,8 @@ engine = create_engine(
     f"postgresql+psycopg://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}", echo=True
 )
 
-Base.metadata.drop_all(engine)
-Base.metadata.create_all(engine)
+# Base.metadata.drop_all(engine)
+# Base.metadata.create_all(engine)
 
 
  
@@ -230,11 +230,27 @@ def getMetricsFromVersion(version):
 
 @app.get("/metrics/{name}/matrix")
 async def get_image(name: str):
+    with engine.connect() as c:
+        stm = versions.select().where(versions.c.name == name)
+        result = c.execute(stm).fetchone()
+        if result is None:
+            raise HTTPException(status_code=404, detail="Image not found")
+        image_path = f"./backend_old/model/ml_models/mtz_confussion/confusion_matrix{name}.png"
+        
+        return FileResponse(image_path, media_type="image/png")
+
+@app.get("/wordcloud/{version}/{Class}")
+async def getWordCloud(version: str, Class: str):
     
-    image_path = f"./backend_old/model/ml_models/mtz_confussion/confusion_matrix{name}.png"
+    with engine.connect() as c:
+        stm = versions.select().where(versions.c.name == version)
+        result = c.execute(stm).fetchone()
+        if result is None or Class not in ['1','2','3','4','5']:
+            raise HTTPException(status_code=404, detail="Image not found")
+        image_path = f"./backend_old/model/ml_models/wordclouds/WordCloud_{version}_{Class}.png"
+        img =  FileResponse(image_path, media_type="image/png")
+        return img
     
-    # Devolver la imagen como una respuesta de archivo estático
-    return FileResponse(image_path, media_type="image/png")
 @app.post("/upload/predict")
 async def upload_predict_csv(csv_file: UploadFile = File(...), version: str = Form(...)):
     try:
@@ -242,21 +258,17 @@ async def upload_predict_csv(csv_file: UploadFile = File(...), version: str = Fo
         df['version'] = version
         df['id'] = None
         df['creator'] = 'Carlos Analista'
-        
-        # Convertir DataFrame a formato CSV en memoria
-        csv_buffer = io.StringIO()
-        df.to_csv(csv_buffer, index=False)
-        csv_data = csv_buffer.getvalue()
-        
         prediction = pr.predict(df, version)
         df['Class'] = prediction
+        csv_ret = df.copy()[['Review','Class']].to_csv( index=False)
         df.rename(columns={"Review": "description", "Class": "calification"}, inplace=True)
         data_json = df.to_dict(orient='records')
         xd = [Prediction(**item) for item in data_json]
         addPredictions(xd)  # Convertir cada dict a objeto Training y pasarlos a addTrainings
         
         # Retornar el archivo CSV convertido como un string
-        return {"message": "Archivo CSV procesado exitosamente", "csv_data": csv_data}
+        print('Logrado')
+        return Response(content=csv_ret, media_type="text/csv")
     except Exception as e:
         print(e)
         return {"error": str(e)}
@@ -295,6 +307,16 @@ async def predict_text(version: str = Query(...), texto: str = Query(...)):
     except Exception as e:
         print(e)
         return {"error": str(e)}
+@app.get('/classified/{version}')
+def getCSVClass(version: str):
+    with engine.connect() as c:
+        stm = predictions.select().where(predictions.c.version == version)
+        result = c.execute(stm).all()
+        df = pd.DataFrame(result)[['description', 'calification']]
+        df.rename(columns={"description": "Review", "calification": "Class"}, inplace=True)
+        csv_string = df.to_csv(index=False)
+        
+        return Response(content=csv_string, media_type="text/csv")
 
 
 @app.get("/")
