@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
 
 function UploadCSV() {
   const [version, setVersion] = useState('');
@@ -44,35 +48,31 @@ function UploadCSV() {
     }
   };
 
-  return (
-<<<<<<< HEAD
-  <div>
-    <h1>Predecir una reseña individual</h1>
-    <select value={version} onChange={handleVersionChange}>
+return (
+  <Box mx paddingLeft="40px">
+    <Stack>
+      <Typography variant="h4" sx={{ fontWeight: 700 }} textAlign="center">
+      Clasificar una reseña individual
+      </Typography>
+      <Typography variant="h6" textAlign="center">
+        Ingrese el texto que desea clasificar:
+      </Typography>
+      <select style={{width: "200px"}} value={version} onChange={handleVersionChange}>
       <option value="">Seleccione una versión</option>
       {versionsList.map((versionItem, index) => (
         <option key={index} value={versionItem.name}>{versionItem.name}</option>
       ))}
-    </select>
-    <input type="text" value={textInput} onChange={handleTextChange} placeholder="Ingrese el texto" />
-    <button onClick={handleSubmit}>Enviar Datos</button>
-    {responseMessage && <p>Respuesta del modelo {version}: {responseMessage}</p>}
-  </div>
+    </select> 
+    <input type="text" style={{height: "50px"}} value={textInput} onChange={handleTextChange} placeholder="Ingrese el texto" />
+    <Button size="small" variant="contained"  style={{width: "200px"}} onClick={handleSubmit}>Enviar datos</Button>
+    {responseMessage && <p>Respuesta del modelo {version}: {responseMessage}</p>}     
+    </Stack>
+  </Box>
 );
-=======
-    <div>
-      <select value={version} onChange={handleVersionChange}>
-        <option value="">Seleccione una versión</option>
-        {versionsList.map((versionItem, index) => (
-          <option key={index} value={versionItem.name}>{versionItem.name}</option>
-        ))}
-      </select>
-      <input type="text" value={textInput} onChange={handleTextChange} placeholder="Ingrese el texto" />
-      <button onClick={handleSubmit}>Enviar CSV</button>
-      {responseMessage && <p>Respuesta del modelo {version}: {responseMessage}</p>}
-    </div>
-  );
->>>>>>> 804b091f0508fd60c3b59649ac056826060816c0
+  
+  
+
 }
 
 export default UploadCSV;
+

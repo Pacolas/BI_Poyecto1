@@ -55,7 +55,7 @@ function UploadCSV() {
     <Box mx paddingLeft="40px">
       <Stack>
         <Typography variant="h4" sx={{ fontWeight: 700 }} textAlign="center">
-          Etiquetar reseñas.
+          Clasificar un archivo de reseñas
         </Typography>
         <Typography variant="h6" textAlign="center">
           Selecciona el archivo con el que deseas categorizar las reseñas

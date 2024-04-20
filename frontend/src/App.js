@@ -18,13 +18,10 @@ function App() {
     
     return (
         <Router>
-
             <Box maxWidth={1400} mx="auto" paddingTop="10px" paddingBottom="10px">
                 <AppBar position="static" >
                     <Toolbar disableGutters>
-                        <Typography variant="h6" mx sx={{fontWeight: 700}}>
-                            Turismo de los Alpes
-                        </Typography>
+                    <img src="https://i.ibb.co/WkDWrx8/TURISMO-LOS-ALPES-1.png" alt="Logo" style={{height: '100px', marginRight: '10px'}} /> 
                         <Box sx={{ flexGrow: 1 }} /> {/* Nuevo Box para empujar el ButtonGroup */}
                         <ButtonGroup color="inherit" variant="text" aria-label="Basic button group">
                             <Button>
@@ -34,12 +31,12 @@ function App() {
                             </Button>
                             <Button>
                                 <Link to="/predict" className="nav-link">
-                                    Predecir una reseña
+                                    Clasificar una reseña
                                 </Link>
                             </Button>
                             <Button>
                                 <Link to="/predicts" className="nav-link">
-                                    Predecir una reseña
+                                    Clasificar un archivo de reseñas
                                 </Link>
                             </Button>
                         </ButtonGroup>
