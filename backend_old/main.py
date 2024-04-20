@@ -230,11 +230,27 @@ def getMetricsFromVersion(version):
 
 @app.get("/metrics/{name}/matrix")
 async def get_image(name: str):
+    with engine.connect() as c:
+        stm = versions.select().where(versions.c.name == name)
+        result = c.execute(stm).fetchone()
+        if result is None:
+            raise HTTPException(status_code=404, detail="Image not found")
+        image_path = f"./backend_old/model/ml_models/mtz_confussion/confusion_matrix{name}.png"
+        
+        return FileResponse(image_path, media_type="image/png")
+
+@app.get("/wordcloud/{version}/{Class}")
+async def getWordCloud(version: str, Class: str):
     
-    image_path = f"./backend_old/model/ml_models/mtz_confussion/confusion_matrix{name}.png"
+    with engine.connect() as c:
+        stm = versions.select().where(versions.c.name == version)
+        result = c.execute(stm).fetchone()
+        if result is None or Class not in ['1','2','3','4','5']:
+            raise HTTPException(status_code=404, detail="Image not found")
+        image_path = f"./backend_old/model/ml_models/wordclouds/WordCloud_{version}_{Class}.png"
+        img =  FileResponse(image_path, media_type="image/png")
+        return img
     
-    # Devolver la imagen como una respuesta de archivo estático
-    return FileResponse(image_path, media_type="image/png")
 @app.post("/upload/predict")
 async def upload_predict_csv(csv_file: UploadFile = File(...), version: str = Form(...)):
     try:
