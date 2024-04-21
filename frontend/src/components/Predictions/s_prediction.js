@@ -5,6 +5,7 @@ import TextField from '@mui/material/TextField';
 import { Button } from '@mui/material';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
+
 function UploadCSV() {
   const [version, setVersion] = useState('');
   const [responseMessage, setResponseMessage] = useState('');
@@ -24,6 +25,7 @@ function UploadCSV() {
 
     fetchVersions();
   }, []);
+
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
   };
@@ -41,15 +43,35 @@ function UploadCSV() {
       const response = await axios.post('http://localhost:8000/upload/predict', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
-        }
-      })
-      setResponseMessage(response.data.message);;
-      alert('Archivo CSV enviado exitosamente.');
+        },
+        responseType: 'blob' // Esperamos un blob como respuesta
+      });
+
+      // Crear un objeto Blob con los datos recibidos
+      const csvBlob = new Blob([response.data], { type: 'text/csv' });
+
+      // Crear una URL del objeto Blob
+      const csvUrl = window.URL.createObjectURL(csvBlob);
+
+      // Crear un enlace para descargar el archivo CSV
+      const link = document.createElement('a');
+      link.href = csvUrl;
+      link.download = `predictions_${version}.csv`; // Nombre de archivo sugerido
+      document.body.appendChild(link);
+
+      // Hacer clic en el enlace para iniciar la descarga
+      link.click();
+
+      // Limpiar la URL del objeto Blob
+      window.URL.revokeObjectURL(csvUrl);
+
+      setResponseMessage('Archivo CSV recibido exitosamente.');
+
     } catch (error) {
-      console.error('Error al enviar el archivo CSV:', error);
-      alert('Error al enviar el archivo CSV.');
+      console.error('Error al recibir el archivo CSV:', error);
+      alert('Error al recibir el archivo CSV.');
     }
-    };
+  };
 
   return (
     <Box mx paddingLeft="40px">
@@ -67,27 +89,19 @@ function UploadCSV() {
           Escribe el nombre con el que deseas guardar el archivo
         </Typography>
         <Box mx="auto" display="flex" alignItems="center">
-          
-         
-       
-      <div>
-      <select value={version} onChange={handleVersionChange}>
-        <option value="">Seleccione una versión</option>
-        {versionsList.map((versionItem, index) => (
-          <option key={index} value={versionItem.name}>{versionItem.name}</option>
-        ))}
-      </select>
-      <Button size="large" variant="contained" onClick={handleSubmit}>Enviar CSV</Button>
-      {responseMessage && <p>Respuesta del modelo {version}: {responseMessage}</p>}
-    </div>
-        
-
+          <div>
+            <select value={version} onChange={handleVersionChange}>
+              <option value="">Seleccione una versión</option>
+              {versionsList.map((versionItem, index) => (
+                <option key={index} value={versionItem.name}>{versionItem.name}</option>
+              ))}
+            </select>
+            <Button size="large" variant="contained" onClick={handleSubmit}>Enviar CSV</Button>
+            {responseMessage && <p>Respuesta del modelo {version}: {responseMessage}</p>}
+          </div>
+        </Box>
+      </Stack>
     </Box>
-        
-        </Stack>
-      
-    </Box>
-    
   );
 }
 
